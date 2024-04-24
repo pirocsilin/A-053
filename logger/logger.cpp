@@ -42,8 +42,9 @@ void Logger::initFiles()
         else if(filename.contains(fileNameA053)) countA053Files++;
     }
 
-    fileBpi.setFileName(fileNameBpi + "_" + QString::number(countBpiFiles) + expansion);
-    fileA053.setFileName(fileNameA053 + "_" + QString::number(countA053Files) + expansion);
+    QDateTime currentDateTime = QDateTime::currentDateTime();
+    fileBpi.setFileName(fileNameBpi + "_" + currentDateTime.toString(DATE_TIME) + expansion);
+    fileA053.setFileName(fileNameA053 + "_" + currentDateTime.toString(DATE_TIME) + expansion);
 
     if(!fileBpi.open(QIODevice::Append  | QIODevice::Text) ||
        !fileA053.open(QIODevice::Append | QIODevice::Text)  )

@@ -10,12 +10,7 @@ MainWindow::MainWindow(QWidget *parent)
     qRegisterMetaType<BpiData>("BpiData");
     qRegisterMetaType<DWORD>("DWORD");
 
-    ui->label_ind_bpi->setStyleSheet(RED_BACKGROUNG);
-    ui->label_ind_a053->setStyleSheet(RED_BACKGROUNG);
-    ui->button_startRecord->setEnabled(false);
-    ui->button_stopRecord->setEnabled(false);
-    ui->label_hint_bpi->setText(INVALID_DATA);
-    ui->label_hint_a053->setText(INVALID_DATA);
+    slotStateController();
 
     connect(&bpiWatcher, &BPIwatcher::signalSendBpiData, this, &MainWindow::slotInputBpiData);
     connect(&bpiWatcher, &BPIwatcher::signalSendBpiData, &logger, &Logger::writeBpiData);
@@ -23,9 +18,9 @@ MainWindow::MainWindow(QWidget *parent)
     //connect(&a053watcher, &A053watcher::signalSendData, &logger, &Logger::writeA053Data);
     //
     connect(this, &MainWindow::signalSwitchStateRecord, &logger, &Logger::slotSwitchStateRecord);
-    connect(ui->button_startRecord, SIGNAL(clicked()), this, SLOT(slotStartRecord()));
-    connect(ui->button_stopRecord,  SIGNAL(clicked()), this, SLOT(slotStopRecord()));
-    connect(&stateControlTimer, &QTimer::timeout, this, &MainWindow::slotStateController);
+    connect(ui->button_startRecord, SIGNAL(clicked()), this, SLOT(slotRecordController()));
+
+    connect(&timerStateControl, &QTimer::timeout, this, &MainWindow::slotStateController);
     connect(&timerShowData, &QTimer::timeout, this, &MainWindow::slotShowData);
     //
     connect(&bpiWatcher, &QThread::finished, &bpiWatcher, &QThread::deleteLater);
@@ -33,7 +28,7 @@ MainWindow::MainWindow(QWidget *parent)
     connect(&logger, &QThread::finished, &logger, &QThread::deleteLater);
 
     timerShowData.start(200);
-    stateControlTimer.start(500);
+    timerStateControl.start(500);
 }
 
 MainWindow::~MainWindow()
@@ -67,14 +62,15 @@ void MainWindow::slotStateController()
         ui->label_ind_a053->setStyleSheet(RED_BACKGROUNG);
         ui->label_hint_bpi->setText(INVALID_DATA);
         ui->label_hint_a053->setText(INVALID_DATA);
-        if(recordingIsActive)
-        {
-            slotInvalidData();
-        }
-        else
-            disableButtons();
-        comingDataBpi = true;
-        comingDataA053 = true;
+        //
+        ui->button_startRecord->setFixedWidth(250);
+        ui->button_startRecord->setText("Нет данных от BPI, A053");
+        ui->button_startRecord->setEnabled(false);
+        //
+        if(recordingIsActive) invalidData();
+        //
+        comingDataBpi = false;
+        comingDataA053 = false;
         break;
 
     case NO_DATA_FROM_BPI:
@@ -82,42 +78,54 @@ void MainWindow::slotStateController()
         ui->label_ind_a053->setStyleSheet(GREEN_BACKGROUNG);
         ui->label_hint_bpi->setText(INVALID_DATA);
         ui->label_hint_a053->setText(VALID_DATA);
-        if(recordingIsActive)
-        {
-            slotInvalidData();
-        }
-        else
-            disableButtons();
+        //
+        ui->button_startRecord->setFixedWidth(200);
+        ui->button_startRecord->setText("Нет данных от BPI");
+        ui->button_startRecord->setEnabled(false);
+        //
+        if(recordingIsActive) invalidData();
+        //
         comingDataBpi = false;
         comingDataA053 = true;
         break;
 
-    case NO_DATA_FROM_A053:
+    case NO_DATA_FROM_A053:{
         ui->label_ind_bpi->setStyleSheet(GREEN_BACKGROUNG);
         ui->label_ind_a053->setStyleSheet(RED_BACKGROUNG);
         ui->label_hint_bpi->setText(VALID_DATA);
         ui->label_hint_a053->setText(INVALID_DATA);
-        if(recordingIsActive)
-        {
-            slotInvalidData();
-        }
-        else
-            disableButtons();
-
+        //
+        /*ui->button_startRecord->setFixedWidth(215);
+        ui->button_startRecord->setText("Нет данных от A-053");
+        ui->button_startRecord->setEnabled(false);
+        //
+        if(recordingIsActive) invalidData();
+        //
         comingDataBpi = true;
-        comingDataA053 = false;
-        break;
+        comingDataA053 = false;*/
 
+        ui->button_startRecord->setEnabled(true);
+        ui->button_startRecord->setFixedWidth(210);
+        QString text = !recordingIsActive ? "Начать запись" :
+                                            "Остановить запись";
+        ui->button_startRecord->setText(text);
+        //
+        comingDataBpi = comingDataA053 = true;
+
+        break;
+    }
     case DATA_IS_SUCESS:
-        if(!recordingIsActive)
-        {
-            ui->button_startRecord->setEnabled(true);
-            ui->button_stopRecord->setEnabled(false);
-            ui->label_ind_bpi->setStyleSheet(GREEN_BACKGROUNG);
-            ui->label_ind_a053->setStyleSheet(GREEN_BACKGROUNG);
-            ui->label_hint_bpi->setText(VALID_DATA);
-            ui->label_hint_a053->setText(VALID_DATA);
-        }
+        ui->label_ind_bpi->setStyleSheet(GREEN_BACKGROUNG);
+        ui->label_ind_a053->setStyleSheet(GREEN_BACKGROUNG);
+        ui->label_hint_bpi->setText(VALID_DATA);
+        ui->label_hint_a053->setText(VALID_DATA);
+        //
+        ui->button_startRecord->setEnabled(true);
+        ui->button_startRecord->setFixedWidth(210);
+        QString text = !recordingIsActive ? "Начать запись" :
+                                            "Остановить запись";
+        ui->button_startRecord->setText(text);
+        //
         comingDataBpi = comingDataA053 = true;
         break;
     }
@@ -126,27 +134,29 @@ void MainWindow::slotStateController()
     prevNumberA053Frame = counterA053Frames;
 }
 
-void MainWindow::slotStartRecord()
+void MainWindow::slotRecordController()
 {
-    recordingIsActive = true;
-    ui->button_startRecord->setEnabled(false);
-    ui->button_stopRecord->setEnabled(true);
-    emit signalSwitchStateRecord(true);
+    if(!recordingIsActive)
+    {
+        recordingIsActive = true;
+        ui->button_startRecord->setFixedWidth(210);
+        ui->button_startRecord->setText("Остановить запись");
+        //
+        emit signalSwitchStateRecord(true);
+    }
+    else
+    {
+        recordingIsActive = false;
+        ui->button_startRecord->setFixedWidth(210);
+        ui->button_startRecord->setText("Начать запись");
+        //
+        emit signalSwitchStateRecord(false);
+    }
 }
 
-void MainWindow::slotStopRecord()
+void MainWindow::invalidData()
 {
     recordingIsActive = false;
-    ui->button_startRecord->setEnabled(true);
-    ui->button_stopRecord->setEnabled(false);
-    emit signalSwitchStateRecord(false);
-}
-
-void MainWindow::slotInvalidData()
-{
-    recordingIsActive = false;
-    ui->button_startRecord->setEnabled(false);
-    ui->button_stopRecord->setEnabled(false);
     emit signalSwitchStateRecord(false);
 }
 
@@ -170,11 +180,5 @@ void MainWindow::slotShowData()
         ui->lineEdit_time_a053->setText(currentTime.toString("hh:mm:ss:zzz"));
         ui->lineEdit_alt_a053->setText(QString::number(lastA053Data));
     }
-}
-
-void MainWindow::disableButtons()
-{
-    ui->button_startRecord->setEnabled(false);
-    ui->button_stopRecord->setEnabled(false);
 }
 

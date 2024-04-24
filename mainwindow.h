@@ -1,10 +1,10 @@
 #ifndef MAINWINDOW_H
 #define MAINWINDOW_H
 
-#define RED_BACKGROUNG "background-color: rgb(255, 0, 0); border: 1 solid black;"
+#define RED_BACKGROUNG   "background-color: rgb(255, 0, 0); border: 1 solid black;"
 #define GREEN_BACKGROUNG "background-color: rgb(0, 255, 0); border: 1 solid black;"
-#define VALID_DATA "[Данные поступают]"
-#define INVALID_DATA "[Данные не поступают]"
+#define VALID_DATA       "[Данные поступают]"
+#define INVALID_DATA     "[Данные не поступают]"
 
 #include <QMainWindow>
 #include <QTimer>
@@ -48,21 +48,20 @@ private:
     bool recordingIsActive  {false};
     bool comingDataBpi      {false};
     bool comingDataA053     {false};
-    QTimer stateControlTimer;
+    QTimer timerStateControl;
     QTimer timerShowData;
 
     BpiData lastBpiData {};
     DWORD   lastA053Data{};
 
+    void invalidData();
+
 public slots:
    void slotInputBpiData(BpiData data);
    void slotInputA053Data(DWORD data);
    void slotStateController();
-   void slotStartRecord();
-   void slotStopRecord();
-   void slotInvalidData();
    void slotShowData();
-   void disableButtons();
+   void slotRecordController();
 
 signals:
     void signalStopRecord();

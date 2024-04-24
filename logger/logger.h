@@ -8,6 +8,8 @@
 //#include <objbase.h>
 #include "common.h"
 
+#define DATE_TIME "yyyy-MM-dd[hh:mm:ss]"
+
 typedef unsigned long DWORD;
 
 class Logger : public QThread
@@ -33,7 +35,7 @@ private:
         "work_time", "pni_bits", "fix_bits", "recv_status"
     };
 
-    const QVector<QString> headerA053 { "Time", "Altitude" };
+    const QVector<QString> headerA053 { "Time", "Altitude", "Arink_word"};
 
     QString fileNameBpi {"Log_BPI"};
     QString fileNameA053{"Log_A-053"};

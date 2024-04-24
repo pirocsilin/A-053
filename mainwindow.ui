@@ -53,7 +53,7 @@
       <x>20</x>
       <y>40</y>
       <width>251</width>
-      <height>201</height>
+      <height>206</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout">
@@ -275,7 +275,7 @@
       <x>310</x>
       <y>40</y>
       <width>211</width>
-      <height>52</height>
+      <height>56</height>
      </rect>
     </property>
     <layout class="QFormLayout" name="formLayout_2">
@@ -442,9 +442,9 @@ border: 1 solid black;</string>
    <widget class="QPushButton" name="button_startRecord">
     <property name="geometry">
      <rect>
-      <x>100</x>
+      <x>190</x>
       <y>320</y>
-      <width>171</width>
+      <width>211</width>
       <height>41</height>
      </rect>
     </property>
@@ -454,25 +454,7 @@ border: 1 solid black;</string>
      </font>
     </property>
     <property name="text">
-     <string>Начать запись</string>
-    </property>
-   </widget>
-   <widget class="QPushButton" name="button_stopRecord">
-    <property name="geometry">
-     <rect>
-      <x>310</x>
-      <y>320</y>
-      <width>191</width>
-      <height>41</height>
-     </rect>
-    </property>
-    <property name="font">
-     <font>
-      <pointsize>15</pointsize>
-     </font>
-    </property>
-    <property name="text">
-     <string>Остановить  запись</string>
+     <string>Остановить запись</string>
     </property>
    </widget>
    <widget class="QWidget" name="layoutWidget">
@@ -568,7 +550,7 @@ border: 1 solid black;</string>
      <x>0</x>
      <y>0</y>
      <width>606</width>
-     <height>21</height>
+     <height>22</height>
     </rect>
    </property>
   </widget>
